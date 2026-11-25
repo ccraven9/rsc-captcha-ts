@@ -2,7 +2,7 @@ const Image =
     typeof window !== 'undefined' ? window.Image : require('canvas').Image;
 
 const fs = require('fs');
-const enUKWords = require('../en-uk');
+const enUKWords = require('./en-uk.json');
 let { createCanvas } = require('canvas');
 
 if (typeof OffscreenCanvas !== 'undefined') {
@@ -12,7 +12,7 @@ if (typeof OffscreenCanvas !== 'undefined') {
 }
 
 const FONT_IMAGE = fs
-    .readFileSync(__dirname + '/../fonts.png')
+    .readFileSync(__dirname + '/fonts.png')
     .toString('base64');
 
 const CHAR_WIDTH = 48;

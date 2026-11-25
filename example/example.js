@@ -1,6 +1,7 @@
 const Captcha = require('../src/index');
 const captcha = new Captcha();
 const fs = require('fs');
+const path = require('path');
 
 function blobToBase64(blob) {
     const reader = new FileReader();
@@ -32,7 +33,10 @@ function blobToBase64(blob) {
 
             document.body.appendChild(document.createElement('br'));
         } else {
-            fs.writeFileSync(`${word}.png`, image.toBuffer());
+            fs.writeFileSync(
+                path.join(__dirname, `${i}-${word}.png`),
+                image.toBuffer()
+            );
         }
     }
 })();
