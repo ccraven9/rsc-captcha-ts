@@ -26,11 +26,39 @@ after installing from GitHub it is required as:
 const Captcha = require('@2003scape/rsc-captcha-ts');
 ```
 
-> **Note:** `canvas` is a native dependency. On modern Node.js versions it may
-> fail to install without build tools; upgrading it is part of the fork's
-> modernization goals.
-
 ## Example
+
+A runnable example is included in [`example/example.js`](./example/example.js).
+It generates 10 captchas and saves each image as a `<word>.png` file.
+
+### Running the example
+
+Install dependencies first (this also builds the native `canvas` dependency):
+
+```sh
+npm install
+```
+
+Then run the script from the repository root:
+
+```sh
+node example/example.js
+```
+
+You can also run it from inside the `example` folder:
+
+```sh
+cd example
+node example.js
+```
+
+> **Note:** PNGs are written to the current working directory, so run the
+> script from `example/` to keep the generated images there.
+
+The example also supports browsers via browserify: when `process.browser` is
+true, it appends each word and image to the page instead of writing files.
+
+### Example code
 
 ```javascript
 const Captcha = require('@2003scape/rsc-captcha-ts');

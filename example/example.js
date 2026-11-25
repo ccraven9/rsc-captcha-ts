@@ -1,4 +1,4 @@
-const Captcha = require('./src/index');
+const Captcha = require('../src/index');
 const captcha = new Captcha();
 const fs = require('fs');
 
