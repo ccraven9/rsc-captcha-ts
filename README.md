@@ -29,7 +29,7 @@ const Captcha = require('@2003scape/rsc-captcha-ts');
 ## Example
 
 A runnable example is included in [`example/example.js`](./example/example.js).
-It generates 10 captchas and saves each image as a `<word>.png` file.
+It generates 10 captchas and saves each image as `<index>-<word>.png`.
 
 ### Running the example
 
@@ -52,8 +52,8 @@ cd example
 node example.js
 ```
 
-> **Note:** PNGs are written to the current working directory, so run the
-> script from `example/` to keep the generated images there.
+> **Note:** PNGs are written next to the script (in `example/`), regardless of
+> the current working directory.
 
 The example also supports browsers via browserify: when `process.browser` is
 true, it appends each word and image to the page instead of writing files.
@@ -64,6 +64,18 @@ true, it appends each word and image to the page instead of writing files.
 const Captcha = require('@2003scape/rsc-captcha-ts');
 const captcha = new Captcha();
 const fs = require('fs');
+const path = require('path');
+
+function blobToBase64(blob) {
+    const reader = new FileReader();
+    reader.readAsDataURL(blob);
+
+    return new Promise((resolve) => {
+        reader.onloadend = () => {
+            resolve(reader.result);
+        };
+    });
+}
 
 (async () => {
     await captcha.loadFonts();
@@ -73,10 +85,21 @@ const fs = require('fs');
 
         if (process.browser) {
             document.body.appendChild(new Text(word));
-            document.body.appendChild(image);
+
+            if (image.constructor.name === 'OffscreenCanvas') {
+                const img = document.createElement('img');
+                img.src = `${await blobToBase64(await image.convertToBlob())}`;
+                document.body.appendChild(img);
+            } else {
+                document.body.appendChild(image);
+            }
+
             document.body.appendChild(document.createElement('br'));
         } else {
-            fs.writeFileSync(`${word}.png`, image.toBuffer());
+            fs.writeFileSync(
+                path.join(__dirname, `${i}-${word}.png`),
+                image.toBuffer()
+            );
         }
     }
 })();
@@ -91,11 +114,12 @@ Converts any canvas into a game client-compatible RLE byte array.
 ### captcha = new Captcha(words?)
 
 Creates a new captcha generator instance. `words` is an array of words to
-randomly select from (defaults to `en-uk`, with word lengths between 4 and 9).
+randomly select from (defaults to `src/en-uk.json`, with word lengths between
+4 and 9).
 
 ### async captcha.loadFonts()
 
-Loads the main font image (`fonts.png`). Run before generating captchas.
+Loads the main font image (`src/fonts.png`). Run before generating captchas.
 
 ### captcha.generate()
 
