@@ -1,19 +1,81 @@
-# rsc-captcha
-generate runescape classic sleep screen words. players would enter the generated
+# rsc-captcha-ts
+
+> **Fork notice:** This is a fork of
+> [`2003scape/rsc-captcha-ts`](https://github.com/2003scape/rsc-captcha-ts),
+> maintained by [@ccraven9](https://github.com/ccraven9) as part of a
+> modernization effort for the 2003scape ecosystem.
+
+Generates RuneScape Classic sleep screen words. Players enter the generated
 word during the [fatigue](https://classic.runescape.wiki/w/Fatigue) system to
 continue gaining experience.
 
-![](./captchas.gif?raw=true)
+![Example captchas](./captchas.gif?raw=true)
 
-## install
+## Install
 
-    $ npm install @2003scape/rsc-captcha
+From GitHub:
 
-## example
+```sh
+npm install github:ccraven9/rsc-captcha-ts
+```
+
+The package is still named `@2003scape/rsc-captcha-ts` (see `package.json`), so
+after installing from GitHub it is required as:
+
+```js
+const Captcha = require('@2003scape/rsc-captcha-ts');
+```
+
+## Example
+
+A runnable example is included in [`example/example.js`](./example/example.js).
+It generates 10 captchas and saves each image as `<index>-<word>.png`.
+
+### Running the example
+
+Install dependencies first (this also builds the native `canvas` dependency):
+
+```sh
+npm install
+```
+
+Then run the script from the repository root:
+
+```sh
+node example/example.js
+```
+
+You can also run it from inside the `example` folder:
+
+```sh
+cd example
+node example.js
+```
+
+> **Note:** PNGs are written next to the script (in `example/`), regardless of
+> the current working directory.
+
+The example also supports browsers via browserify: when `process.browser` is
+true, it appends each word and image to the page instead of writing files.
+
+### Example code
+
 ```javascript
-const Captcha = require('./src/index');
+const Captcha = require('@2003scape/rsc-captcha-ts');
 const captcha = new Captcha();
 const fs = require('fs');
+const path = require('path');
+
+function blobToBase64(blob) {
+    const reader = new FileReader();
+    reader.readAsDataURL(blob);
+
+    return new Promise((resolve) => {
+        reader.onloadend = () => {
+            resolve(reader.result);
+        };
+    });
+}
 
 (async () => {
     await captcha.loadFonts();
@@ -23,28 +85,45 @@ const fs = require('fs');
 
         if (process.browser) {
             document.body.appendChild(new Text(word));
-            document.body.appendChild(image);
+
+            if (image.constructor.name === 'OffscreenCanvas') {
+                const img = document.createElement('img');
+                img.src = `${await blobToBase64(await image.convertToBlob())}`;
+                document.body.appendChild(img);
+            } else {
+                document.body.appendChild(image);
+            }
+
             document.body.appendChild(document.createElement('br'));
         } else {
-            fs.writeFileSync(`${word}.png`, image.toBuffer());
+            fs.writeFileSync(
+                path.join(__dirname, `${i}-${word}.png`),
+                image.toBuffer()
+            );
         }
     }
 })();
 ```
 
-## api
+## API
+
 ### Captcha.toByteArray(canvas)
-convert any canvas into a game client-compatible RLE byte array.
+
+Converts any canvas into a game client-compatible RLE byte array.
 
 ### captcha = new Captcha(words?)
-create a new captcha generator instance. words is an array of words to randomly
-select from (defaults to en-uk with lengths between 4-9).
+
+Creates a new captcha generator instance. `words` is an array of words to
+randomly select from (defaults to `src/en-uk.json`, with word lengths between
+4 and 9).
 
 ### async captcha.loadFonts()
-load the main font image (`font.png`). run before generating captchas.
+
+Loads the main font image (`src/fonts.png`). Run before generating captchas.
 
 ### captcha.generate()
-generate a word and captcha associated with it. returns:
+
+Generates a word and captcha associated with it. Returns:
 
 ```javascript
 {
@@ -54,13 +133,17 @@ generate a word and captcha associated with it. returns:
 ```
 
 ### captcha.getWord()
-pick a random word from the dictionary.
+
+Picks a random word from the dictionary.
 
 ### captcha.generateImage(word)
-create a Canvas with specified word.
 
-## license
-Copyright 2020  2003Scape Team
+Creates a Canvas with the specified word.
+
+## License
+
+Copyright 2020 2003Scape Team
+
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU Affero General Public License as published by the
