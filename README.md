@@ -26,6 +26,24 @@ after installing from GitHub it is required as:
 const Captcha = require('@2003scape/rsc-captcha-ts');
 ```
 
+### Install as a dependency
+
+Add the package to your project's `package.json`:
+
+```json
+"dependencies": {
+  "@2003scape/rsc-captcha-ts": "github:ccraven9/rsc-captcha-ts#master"
+}
+```
+
+Then run:
+
+```sh
+npm install
+```
+
+The package is still imported using `@2003scape/rsc-captcha-ts`.
+
 ## Example
 
 A runnable example is included in [`example/example.js`](./example/example.js).
